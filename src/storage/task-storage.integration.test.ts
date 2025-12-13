@@ -4,9 +4,7 @@ import path from 'path';
 import { loadTasks, saveTasks, addTask, markDone, listTasks } from './task-storage.js';
 import type { Task } from './types.js';
 
-const TEST_DATA_DIR = path.resolve(process.cwd(), 'data-test');
-
-describe('unit: Task Storage', () => {
+describe('integration: Task Storage', () => {
   const originalDataDir = path.resolve(process.cwd(), 'data');
   const tasksFile = path.join(originalDataDir, 'tasks.json');
 
