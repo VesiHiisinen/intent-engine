@@ -6,13 +6,7 @@ export default defineConfig({
     environment: 'node',
 
     include: ['**/*.test.ts', '**/*.spec.ts'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/*.integration.test.ts',
-      '**/*.e2e.test.ts',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
 
     coverage: {
       provider: 'v8',
@@ -21,15 +15,10 @@ export default defineConfig({
       exclude: [
         'src/**/*.test.ts',
         'src/**/*.spec.ts',
-        'src/**/*.integration.test.ts',
-        'src/**/*.e2e.test.ts',
         'src/types/**',
         'src/**/*.d.ts',
         'src/index.ts',
-        'src/bot.ts',
         'src/**/index.ts',
-        'src/messaging/adapters/**',
-        'src/storage/task-storage.ts',
       ],
       thresholds: {
         lines: 70,
