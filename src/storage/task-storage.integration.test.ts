@@ -4,14 +4,15 @@ import path from 'path';
 import { loadTasks, saveTasks, addTask, markDone, listTasks } from './task-storage.js';
 import type { Task } from './types.js';
 
+const TEST_DATA_DIR = path.resolve(process.cwd(), 'data-test-integration');
+
 describe('integration: Task Storage', () => {
-  const originalDataDir = path.resolve(process.cwd(), 'data');
-  const tasksFile = path.join(originalDataDir, 'tasks.json');
+  const tasksFile = path.join(TEST_DATA_DIR, 'tasks.json');
 
   beforeEach(async () => {
-    process.env.NODE_ENV = 'test';
+    process.env.TASKS_DATA_DIR = TEST_DATA_DIR;
     // Ensure data directory exists
-    await fs.mkdir(originalDataDir, { recursive: true });
+    await fs.mkdir(TEST_DATA_DIR, { recursive: true });
     // Clear tasks file before each test
     try {
       await fs.unlink(tasksFile);
@@ -27,6 +28,7 @@ describe('integration: Task Storage', () => {
     } catch {
       // Ignore cleanup errors
     }
+    delete process.env.TASKS_DATA_DIR;
   });
 
   describe('loadTasks', () => {
