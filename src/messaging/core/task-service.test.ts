@@ -73,12 +73,12 @@ describe('unit: TaskService', () => {
 
   describe('completeTaskByIndex', () => {
     it('should complete task by index', async () => {
-      const tasks = [
+      const tasks: Task[] = [
         { ...mockTask, id: '1', text: 'Task 1' },
         { ...mockTask, id: '2', text: 'Task 2' },
         { ...mockTask, id: '3', text: 'Task 3' },
       ];
-      const completedTask = { ...tasks[1], status: 'done' as const };
+      const completedTask: Task = { ...mockTask, id: '2', text: 'Task 2', status: 'done' as const };
 
       vi.mocked(listTasks).mockResolvedValue(tasks);
       vi.mocked(markDone).mockResolvedValue(completedTask);

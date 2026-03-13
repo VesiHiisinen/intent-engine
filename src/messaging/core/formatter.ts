@@ -16,12 +16,24 @@ export class MessageFormatter {
   }
 
   static dailyIntent(tasks: Task[]): string {
+    const ritualName = process.env.RITUAL_NAME ?? 'Daily Directive';
+    const today = new Date().toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const taskLines = tasks.map((t, i) => {
+      const mins = t.estimatedMinutes ? ` (${t.estimatedMinutes} min)` : '';
+      return `${i + 1}. ${t.text}${mins}`;
+    });
+
     return [
-      '🌅 *Good morning!* Here\'s your focus for today:',
+      `📜 *${ritualName} — ${today}*`,
       '',
-      ...tasks.map((t, i) => `${i + 1}. ${t.text} (${t.energy} energy)`),
+      ...taskLines,
       '',
-      'Reply `/done 1` when you complete a task!',
+      'Reply `/done <number>` when you complete a task.',
     ].join('\n');
   }
 
@@ -30,8 +42,56 @@ export class MessageFormatter {
     return `✅ *Added:* ${energy} "${task.text}"`;
   }
 
-  static taskCompleted(task: Task): string {
-    return `🎉 *Completed:* "${task.text}"\n\nGreat work! Keep it up!`;
+  static taskCompleted(task: Task, completedCount: number, totalCount: number): string {
+    const remaining = totalCount - completedCount;
+    const dopamine = (completedCount * 0.25).toFixed(2);
+    const remainingLine =
+      remaining > 0
+        ? `${remaining} task${remaining > 1 ? 's' : ''} remaining.`
+        : 'All tasks complete. Outstanding.';
+
+    return [
+      `✅ *"${task.text}"* — done.`,
+      '',
+      `Progress recorded. dopamine += ${dopamine} 🧠`,
+      remainingLine,
+    ].join('\n');
+  }
+
+  static noActiveMission(): string {
+    return [
+      '📭 No active mission today.',
+      '',
+      'The daily intent has not been sent yet, or all tasks are complete.',
+      'Use `/alltasks` to see all pending tasks.',
+    ].join('\n');
+  }
+
+  static taskNotInMission(taskNumber: number): string {
+    return `❌ Task ${taskNumber} is not part of today's mission.\n\nUse \`/today\` to see your current tasks.`;
+  }
+
+  static todayMission(tasks: Task[], completedIds: string[]): string {
+    if (tasks.length === 0) {
+      return '📭 No mission active today. Check back tomorrow!';
+    }
+
+    const lines = tasks.map((t, i) => {
+      const done = completedIds.includes(t.id);
+      const status = done ? '✅' : '⬜';
+      return `${i + 1}. ${status} ${t.text}`;
+    });
+
+    const completedCount = completedIds.length;
+    const totalCount = tasks.length;
+
+    return [
+      `📜 *Today's Mission* (${completedCount}/${totalCount} complete):`,
+      '',
+      ...lines,
+      '',
+      'Reply `/done <number>` to mark a task complete.',
+    ].join('\n');
   }
 
   static error(message: string): string {
@@ -43,8 +103,9 @@ export class MessageFormatter {
       '🤖 *Daily Intent Engine Commands:*',
       '',
       '`+ task description` - Add a new task',
+      '`/today` - Show today\'s mission',
+      '`/done <number>` - Mark today\'s task as complete',
       '`/alltasks` - Show all pending tasks',
-      '`/done <number>` - Mark task as complete',
       '`/help` - Show this help message',
     ].join('\n');
   }
@@ -57,7 +118,7 @@ export class MessageFormatter {
       '',
       '📝 *Get started:*',
       '• Add a task: `+ write tests`',
-      '• View tasks: `/alltasks`',
+      '• View today\'s mission: `/today`',
       '• Complete task: `/done 1`',
       '',
       'Need help? Type `/help`',

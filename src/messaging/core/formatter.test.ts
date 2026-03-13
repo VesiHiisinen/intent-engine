@@ -69,10 +69,20 @@ describe('unit: Message Formatter', () => {
 
   describe('taskCompleted', () => {
     it('should format completion message', () => {
-      const result = MessageFormatter.taskCompleted(mockTask);
-      expect(result).toContain('Completed');
+      const result = MessageFormatter.taskCompleted(mockTask, 1, 3);
       expect(result).toContain('Test task');
-      expect(result).toContain('🎉');
+      expect(result).toContain('dopamine');
+      expect(result).toContain('🧠');
+    });
+
+    it('should show remaining tasks when not all done', () => {
+      const result = MessageFormatter.taskCompleted(mockTask, 1, 3);
+      expect(result).toContain('2 tasks remaining');
+    });
+
+    it('should show all complete message when all done', () => {
+      const result = MessageFormatter.taskCompleted(mockTask, 3, 3);
+      expect(result).toContain('All tasks complete');
     });
   });
 
@@ -108,7 +118,9 @@ describe('unit: Message Formatter', () => {
     it('should format daily intent message', () => {
       const tasks = [mockTask, { ...mockTask, id: '2', text: 'Task 2' }];
       const result = MessageFormatter.dailyIntent(tasks);
-      expect(result).toContain('Good morning');
+      // Header contains ritual name (default "Daily Directive") and a date
+      expect(result).toMatch(/Daily Directive/);
+      expect(result).toMatch(/\d{1,2} \w+ \d{4}/);
       expect(result).toContain('1. Test task');
       expect(result).toContain('2. Task 2');
       expect(result).toContain('/done');
