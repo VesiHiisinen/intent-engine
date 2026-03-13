@@ -3,11 +3,16 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import type { Task, TaskDatabase, EnergyLevel } from './types.js';
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
-const TASKS_FILE = path.join(DATA_DIR, 'tasks.json');
+function getDataDir(): string {
+  return path.resolve(process.cwd(), process.env.TASKS_DATA_DIR ?? 'data');
+}
+
+function getTasksFile(): string {
+  return path.join(getDataDir(), 'tasks.json');
+}
 
 async function ensureDataDir(): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.mkdir(getDataDir(), { recursive: true });
 }
 
 function createEmptyDatabase(): TaskDatabase {
@@ -21,13 +26,13 @@ export async function loadTasks(): Promise<Task[]> {
   await ensureDataDir();
 
   try {
-    const data = await fs.readFile(TASKS_FILE, 'utf-8');
+    const data = await fs.readFile(getTasksFile(), 'utf-8');
     const db: TaskDatabase = JSON.parse(data);
     return db.tasks;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       const emptyDb = createEmptyDatabase();
-      await fs.writeFile(TASKS_FILE, JSON.stringify(emptyDb, null, 2));
+      await fs.writeFile(getTasksFile(), JSON.stringify(emptyDb, null, 2));
       return [];
     }
     throw error;
@@ -42,7 +47,7 @@ export async function saveTasks(tasks: Task[]): Promise<void> {
     tasks,
   };
 
-  await fs.writeFile(TASKS_FILE, JSON.stringify(db, null, 2));
+  await fs.writeFile(getTasksFile(), JSON.stringify(db, null, 2));
 }
 
 export async function addTask(
